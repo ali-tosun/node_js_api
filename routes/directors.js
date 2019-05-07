@@ -27,8 +27,6 @@ router.get('/:director_id', (req, res, next) => {
 
 
         },
-
-
         {
             $lookup: {
                 from: 'movies',

@@ -35,7 +35,19 @@ router.post('/add', function (req, res, next) {
 
 //tüm filmler
 router.get('/', (req, res, next) => {
-    Movie.find({}, (err, data) => {
+    Movie.aggregate([
+        {
+          $lookup:{
+              from:'directors',
+              localField:'director_id',
+              foreignField:'_id',
+              as:'director',
+          }
+        },
+        {
+            $unwind:'$director',
+        }
+    ], (err, data) => {
         if (err)
             res.json(err);
         res.json(data);
