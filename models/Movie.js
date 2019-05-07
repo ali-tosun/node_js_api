@@ -2,9 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const MovieSchema = new Schema({
-    director_id:{
-        type:Schema.Types.ObjectId
-    },
+
+
     title: {
         type: String,
         required: true,
@@ -24,7 +23,10 @@ const MovieSchema = new Schema({
     date:{
         type:Date,
         default:Date.now
-    }
+    },
+    director_id:{
+        type:Schema.Types.ObjectId
+    },
 
 
 });

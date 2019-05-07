@@ -4,14 +4,15 @@ const router = express.Router();
 const Movie = require('../models/Movie');
 
 router.post('/add', function (req, res, next) {
-    let {title, category, country, year, imdb_score} = req.body;
+    let {title, category, country, year, imdb_score,director_id} = req.body;
 
     let movie = new Movie({
         title: title,
         category: category,
         country: country,
         year: year,
-        imdb_score: imdb_score
+        imdb_score: imdb_score,
+        director_id:director_id
     });
 
     const promise = movie.save();
