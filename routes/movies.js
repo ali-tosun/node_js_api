@@ -4,7 +4,7 @@ const router = express.Router();
 const Movie = require('../models/Movie');
 
 router.post('/add', function (req, res, next) {
-    let {title, category, country, year, imdb_score,director_id} = req.body;
+    let {title, category, country, year, imdb_score, director_id, author} = req.body;
 
     let movie = new Movie({
         title: title,
@@ -12,15 +12,23 @@ router.post('/add', function (req, res, next) {
         country: country,
         year: year,
         imdb_score: imdb_score,
-        director_id:director_id
+        director_id: director_id,
+        author: author
     });
+
 
     const promise = movie.save();
 
     promise.then((data) => {
-        res.json(data);
+        res.json({
+            status:true,
+            data
+        });
     }).catch((err) => {
-        res.json(err);
+        res.json({
+            status:false,
+            err
+        });
     });
 
     /* movie.save((err,data)=>{
@@ -37,15 +45,17 @@ router.post('/add', function (req, res, next) {
 router.get('/', (req, res, next) => {
     Movie.aggregate([
         {
-          $lookup:{
-              from:'directors',
-              localField:'director_id',
-              foreignField:'_id',
-              as:'director',
-          }
+            $lookup: {
+                from: 'directors',
+                localField: 'director_id',
+                foreignField: '_id',
+                as: 'director',
+            }
         },
         {
-            $unwind:'$director',
+
+            $unwind: '$director',
+
         }
     ], (err, data) => {
         if (err)
@@ -60,10 +70,24 @@ router.get('/top10', (req, res, next) => {
         if (err)
             res.json(err);
         res.json(data);
-    }).limit(10).sort({imdb_score:-1});
+    }).limit(10).sort({imdb_score: -1});
 });
 
-
+router.get('/allfilm',(req,res,next)=>{
+   Movie.find({},(err,data) => {
+       if(err){
+           res.json({
+               status:false,
+               err
+           });
+       }else{
+           res.json({
+               status:true,
+               data
+           });
+       }
+   })
+});
 
 
 //id sine göre filmler
@@ -71,7 +95,7 @@ router.get('/:movie_id', (req, res, next) => {
     const promise = Movie.findById(req.params.movie_id);
     promise.then((data) => {
         if (!data) {
-            next({message: 'The movie was not found.',code:99});
+            next({message: 'The movie was not found.', code: 99});
         } else {
             res.json(data);
         }
@@ -81,13 +105,44 @@ router.get('/:movie_id', (req, res, next) => {
     });
 });
 
+router.get('/user_movie/:author', (req, res, next) => {
+    var query = { author: req.params.author };
+    const promise = Movie.find(query);
+    promise.then((data) => {
+        if (!data) {
+            next({status:false,message: 'The movie was not found.', code: 99});
+        } else {
+            res.json({
+                status:true,
+                data
+            });
+        }
+
+    }).catch((err) => {
+        res.json({
+            status:false,
+            err
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
 //movie update.
 router.put('/:movie_id', (req, res, next) => {
-    const promise = Movie.findOneAndUpdate(req.params.movie_id,req.body,{new:true});
+    const promise = Movie.findOneAndUpdate(req.params.movie_id, req.body, {new: true});
     //new:True => değişikliği anında json çıktısı olarak göstermemizi sağlar.
     promise.then((data) => {
         if (!data) {
-            next({message: 'The movie was not found.',code:99});
+            next({message: 'The movie was not found.', code: 99});
         } else {
             res.json(data);
         }
@@ -103,9 +158,9 @@ router.delete('/:movie_id', (req, res, next) => {
     //new:True => değişikliği anında json çıktısı olarak göstermemizi sağlar.
     promise.then((data) => {
         if (!data) {
-            next({message: 'The movie was not found.',code:99});
+            next({message: 'The movie was not found.', code: 99});
         } else {
-            res.json({status:"ok"});
+            res.json({status: "ok"});
         }
 
     }).catch((err) => {
@@ -117,18 +172,18 @@ router.delete('/:movie_id', (req, res, next) => {
 //between
 
 router.get('/between/:start_year/:end_year', (req, res, next) => {
-    const {start_year,end_year} = req.params;
-    Movie.find({year: {
-            "$gte":parseInt(start_year), //greater than or equal büyük veya eşit ise
-            "$lte":parseInt(end_year),    //lower than or equal küçük veya eşit ise.
-        }}, (err, data) => {
+    const {start_year, end_year} = req.params;
+    Movie.find({
+        year: {
+            "$gte": parseInt(start_year), //greater than or equal büyük veya eşit ise
+            "$lte": parseInt(end_year),    //lower than or equal küçük veya eşit ise.
+        }
+    }, (err, data) => {
         if (err)
             res.json(err);
         res.json(data);
-    }).sort({imdb_score:-1});
+    }).sort({imdb_score: -1});
 });
-
-
 
 
 module.exports = router;

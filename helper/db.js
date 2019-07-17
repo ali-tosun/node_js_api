@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 module.exports = () => {
+
+    mongoose.set('useCreateIndex', true); //unique:true yapınca gelen sorunu ortadan kaldırıyor.
     mongoose.connect('mongodb://tosun:123456asd@ds151626.mlab.com:51626/heroku_v07rl3rs',
         {useNewUrlParser: true });
    mongoose.connection.on('open',()=>{

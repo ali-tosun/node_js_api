@@ -27,6 +27,9 @@ const MovieSchema = new Schema({
     director_id:{
         type:Schema.Types.ObjectId
     },
+    author:{
+        type:String
+    }
 
 
 });
